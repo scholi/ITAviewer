@@ -159,16 +159,12 @@ function getData(path, callback, args){
 }
 
 function parseData(buff, args){
-    console.log("Plotting data channel");
     var D = new DataView(buff);
     var slen = D.getUint32(5, true);
     var x = D.getUint32(17, true);
-    console.log("Parsing data");
     var raw = new Uint8Array(buff, 25+slen, x)
-    console.log("RAW",raw[0],raw[1]);
     var data = pako.inflate(raw);
     var Ddata = new DataView(data.buffer);
-    console.log("Data length",data.length);
     var dmin = Ddata.getFloat32(0, true);
     var dmax = Ddata.getFloat32(0, true);
     var s = 0;
@@ -223,24 +219,19 @@ function readImage(){
 }
 
 function readITAimage(buff, info) {
-    console.log("retriving channel",info.id)
     if(buff != undefined){
         var D = new DataView(buff);
         var slen = D.getUint32(5, true);
     }
     if(info.x == undefined){
         if(buff == undefined){
-            console.log("Getting image size")
             getData('filterdata/TofCorrection/ImageStack/Reduced Data/ImageStackScans/Image.XSize', readITAimage, info);
         }else{
             info.x = D.getUint32(25+slen, true);
-            console.log("Image size (x):",info.x)
             getData('filterdata/TofCorrection/ImageStack/Reduced Data/ImageStackScans/Image.XSize', readITAimage, info);
         }
     }else if(info.y == undefined){
         info.y = D.getUint32(25+slen, true);
-        console.log("Image size (y):",info.y)
-        console.log("Retrieve data of image ID",info.id)
         getData('filterdata/TofCorrection/ImageStack/Reduced Data/ImageStackScansAdded/Image['+info.id+']/ImageArray.Long', parseData, info);
     }
 }

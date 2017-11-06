@@ -12,6 +12,12 @@
 
 </script>
 
+<style>
+div > canvas {
+    padding: 20px;
+}
+</style>
+
 <title>Template</title>
 <style>
 </style>
@@ -20,9 +26,21 @@
 <body>
 <div id="App">
 <h1>ITA file viewer</h1>
+
 <input id="itafile" type="file" onchange="readITA()" accept=".ita"/>
+<div id="channelSelector">
 <select id="channels" onChange="readImage()"></select>
+</div>
+<div id="colormapSelector">
+<select id="colormap" onChange="readImage()">
+<option value="hot">hot</option>
+<option value="gray">gray</option>
+<option value="viridis">viridis</option>
+</select>
+</div>
+<div>
 <canvas id="canvas"></canvas>
+</div>
 </div>
 </body>
 </html>

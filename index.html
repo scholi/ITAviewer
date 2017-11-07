@@ -16,6 +16,10 @@
 div > canvas {
     padding: 20px;
 }
+
+.widget {
+    margin: 10px;
+}
 </style>
 
 <title>Template</title>
@@ -26,19 +30,22 @@ div > canvas {
 <body>
 <div id="App">
 <h1>ITA file viewer</h1>
-
+<div class="widget">
 <input id="itafile" type="file" onchange="readITA()" accept=".ita"/>
-<div id="channelSelector">
+</div>
+<div id="channelSelector" class="widget">
+<label for="channels">Channel</label>
 <select id="channels" onChange="readImage()"></select>
 </div>
-<div id="colormapSelector">
+<div id="colormapSelector" class="widget">
+<label for="colormap">Colormap</label>
 <select id="colormap" onChange="readImage()">
 <option value="hot">hot</option>
 <option value="gray">gray</option>
 <option value="viridis">viridis</option>
 </select>
 </div>
-<div>
+<div  class="widget">
 <canvas id="canvas"></canvas>
 </div>
 </div>

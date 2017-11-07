@@ -4,15 +4,56 @@
 <head>
 <meta encoding="utf8"/>
 <link rel="stylesheet" href="css/font-awesome.css"/>
+<link rel="stylesheet" href="css/jquery-ui-lightness.css">
 
-<script src="js/jquery-3.2.1.js"></script>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/jquery-ui.min.js"></script>
 <script src="js/pako.min.js"></script>
+<script src="js/colormap.js"></script>
 <script src="js/ita.js"></script>
 <script type="text/javascript">
-
+$( function() {
+    $('#channels').selectmenu({
+        change: function( event, data ){
+            readImage();
+        }
+    });
+    $('#colormap').selectmenu();
+    $('#slider-range').slider({
+        range: true,
+        min: 0,
+        max: 100,
+        values: [0,100],
+        stop: function( event, ui ) {
+            $('#minmax').val(ui.values[0]+' - ' +ui.values[1]);
+        }
+    });
+    $( "#minmax" ).val( $( "#slider-range" ).slider( "values", 0 ) +
+      " - " + $( "#slider-range" ).slider( "values", 1 ) )
+    $("#options").accordion();
+});
 </script>
 
 <style>
+
+#slider-range{
+    width: 300px;
+}
+
+label {
+    display: inline-block;
+    text-align: right;
+    width: 100px;
+}
+
+input {
+    margin-left: 50px;
+}
+
+body{
+    background-color: #eee;
+}
+
 div > canvas {
     padding: 20px;
 }
@@ -20,6 +61,24 @@ div > canvas {
 .widget {
     margin: 10px;
 }
+
+div#canvasContainer {
+    float: left;
+}
+
+h1 {
+    color: #b24926;
+}
+
+hr {
+    border-top: 2px solid darkBlue;
+}
+
+div#toolbar {
+    float: left;
+    width: 30%;
+}
+
 </style>
 
 <title>Template</title>
@@ -29,9 +88,13 @@ div > canvas {
 
 <body>
 <div id="App">
+<hr/>
 <h1>ITA file viewer</h1>
+<hr/>
+<div id="toolbar">
+<div id="widgets">
 <div class="widget">
-<input id="itafile" type="file" onchange="readITA()" accept=".ita"/>
+<input class="ui-button ui-widget ui-corner-all" id="itafile" type="file" onchange="readITA()" accept=".ita"/>
 </div>
 <div id="channelSelector" class="widget">
 <label for="channels">Channel</label>
@@ -39,15 +102,29 @@ div > canvas {
 </div>
 <div id="colormapSelector" class="widget">
 <label for="colormap">Colormap</label>
-<select id="colormap" onChange="readImage()">
+<select id="colormap" onChange="plotData()">
 <option value="hot">hot</option>
 <option value="gray">gray</option>
 <option value="viridis">viridis</option>
 </select>
 </div>
-<div  class="widget">
+<div id="options">
+<h3 id="auto">Automatic scaling</h3>
+<p>With this option, the colormap will be automatically scaled between the minimum and the maximum of the selected channel.</p>
+<h3 id="manual">Manual scaling</h3>
+<div>
+<p>Manual scaling.
+</p>
+<label for="minmax">Min/Max:</label>
+<input type="text" id="minmax" readonly style="border:0; color:#f6931f; font-weight:bold;">
+<div id="slider-range" onChange="plotData();"></div>
+</div>
+</div>
+</div>
+<div class="widget" id="canvasContainer">
 <canvas id="canvas"></canvas>
 </div>
+</div<
 </div>
 </body>
 </html>

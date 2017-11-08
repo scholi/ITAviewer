@@ -18,7 +18,11 @@ $( function() {
             readImage();
         }
     });
-    $('#colormap').selectmenu();
+    $('#colormap').selectmenu({
+        change: function( event, data ){
+            plotData();
+        }
+    });
     $('#slider-range').slider({
         range: true,
         min: 0,

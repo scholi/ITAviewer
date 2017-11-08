@@ -9,10 +9,10 @@ function hot(value){
     return [r,g,b];
 }
 
-function gray(v){
+function gray(value){
     if(value<0) value=0;
     if(value>1) value=1;
-    return [v,v,v];
+    return [value,value,value];
 }
 
 function viridis(value){

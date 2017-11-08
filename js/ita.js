@@ -183,7 +183,7 @@ function parseData(buff, args){
         range: true,
         min: 0,
         max: dmax,
-        values: [0,dmax],
+        values: [dmin,dmax],
         stop: function( event, ui ) {
             $('#minmax').val(ui.values[0]+' - ' +ui.values[1]);
             plotData();
@@ -195,6 +195,7 @@ function parseData(buff, args){
     plotData();
 }
 function plotData(){
+    $('#channels').selectmenu('refresh');
     var Ddata = new DataView(DataBuff);
     var scaling = $("#options").find("h3[aria-expanded=true]").attr('id');
     if(scaling == 'auto'){

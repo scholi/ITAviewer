@@ -35,19 +35,17 @@ $( function() {
     $( "#minmax" ).val( $( "#slider-range" ).slider( "values", 0 ) +
       " - " + $( "#slider-range" ).slider( "values", 1 ) )
     $("#options").accordion();
+    
+    $('input[type="checkbox"]').checkboxradio();
 });
+
+
 </script>
 
 <style>
 
 #slider-range{
     width: 300px;
-}
-
-label {
-    display: inline-block;
-    text-align: right;
-    width: 100px;
 }
 
 input {
@@ -112,6 +110,11 @@ div#toolbar {
 <option value="viridis">viridis</option>
 </select>
 </div>
+<div id="ToFcorrection">
+<label for="tofcorr">ToF correction</label>
+<input type="checkbox" name="tofcorr" id="tofcorr" onChange="rescale(); plotData();"/>
+<p>Warning ToF correction does not work properly with all data yet.</p>
+</div>  
 <div id="options">
 <h3 id="auto">Automatic scaling</h3>
 <p>With this option, the colormap will be automatically scaled between the minimum and the maximum of the selected channel.</p>

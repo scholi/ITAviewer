@@ -87,13 +87,27 @@ function setPeakName(buff, args){
     var slen = D.getUint32(5, true);
     var x = D.getUint32(17, true);
     var A = new Uint8Array(buff,25+slen);
-    var name = "";
-    for(var i=0;i<x;i+=2){
-        var code = (A[i+1]<<8)|A[i];
-        name += String.fromCharCode(code);
+   
+    if(args.tries == undefined) args.tries=0;
+    if(args.tries==2){
+        var name = (Math.round(D.getFloat64(25+slen, true)*100)/100).toString()+" u";
+    }else{
+        var name = "";
+        for(var i=0;i<x;i+=2){
+            var code = (A[i+1]<<8)|A[i];
+            name += String.fromCharCode(code);
+        }
     }
     if(name==''){
-        getData('MassIntervalList/mi['+args.id+']/desc', setPeakName, args);
+        if(args.tries == 0){
+            args.tries = 1;
+            getData('MassIntervalList/mi['+args.id+']/desc', setPeakName, args);
+        }else if(args.tries==1){
+            args.tries = 2;
+            getData('MassIntervalList/mi['+args.id+']/cmass', setPeakName, args);
+        }else{
+            console.log("Unexpected error to retrieve PeakName",args.id);
+        }
     }else{
         $('#channels option[value="'+args.id+'"').text(name);
     }
@@ -171,11 +185,27 @@ function parseData(buff, args){
     DataBuff = data.buffer.slice(0);
     size.x = args.x;
     size.y = args.y;
-    var dmin = Ddata.getUint32(0, true);
-    var dmax = Ddata.getUint32(0, true);
+    size.N = args.Nscan;
+    rescale();
+    plotData();
+}
+
+function rescale(){
+    var Ddata = new DataView(DataBuff);
+    var val = Ddata.getUint32(0, true);
+    if($('#tofcorr')[0].checked){
+        if(val>size.N) val=size.N;
+        val = -Math.log(1.001-val/size.N);
+    }
+    var dmin = val;
+    var dmax = val;
     var N = size.x*size.y;
     for(var i=0; i<N; i++){
         var val = Ddata.getUint32(4*i, true);
+        if($('#tofcorr')[0].checked){
+             if(val>size.N) val=size.N;
+             val = -Math.log(1.001-val/size.N);
+        }
         if(val < dmin) dmin = val;
         if(val > dmax) dmax = val;
     }
@@ -191,26 +221,19 @@ function parseData(buff, args){
     });
     $( "#minmax" ).val( $( "#slider-range" ).slider( "values", 0 ) +
       " - " + $( "#slider-range" ).slider( "values", 1 ) )
-   
-    plotData();
+    size.dmin = dmin;
+    size.dmax = dmax;
 }
+
 function plotData(){
     $('#channels').selectmenu('refresh');
     var Ddata = new DataView(DataBuff);
     var scaling = $("#options").find("h3[aria-expanded=true]").attr('id');
     if(scaling == 'auto'){
-        var dmin = Ddata.getUint32(0, true);
-        var dmax = Ddata.getUint32(0, true);
-        var s = 0;
-        var s2 = 0;
-        var N = size.x*size.y;
-        for(var i=0; i<N; i++){
-            var val = Ddata.getUint32(4*i, true);
-            s += val;
-            s2 += val*val;
-            if(val < dmin) dmin = val;
-            if(val > dmax) dmax = val;
-        }console.log("Plot auto scaling",dmin,dmax);
+        rescale();
+        var dmin = size.dmin;
+        var dmax = size.dmax;
+        console.log("Plot auto scaling",dmin,dmax);
     }else{
         var dmin = $( "#slider-range" ).slider( "values", 0 );
         var dmax = $( "#slider-range" ).slider( "values", 1 );
@@ -224,6 +247,10 @@ function plotData(){
     for(var y=0; y<size.y; y++){
         for(var x=0; x<size.x; x++){
             var value = Ddata.getUint32(4*(size.x*y+x), true)
+            if($('#tofcorr')[0].checked){
+                if(value>size.N) value=size.N;
+                value = -Math.log(1.001-value/size.N);
+            }
             var norm = (value-dmin)/(dmax-dmin);
             var colormap = $('#colormap').find(':selected').val();
             var rgb;
@@ -271,6 +298,16 @@ function readITAimage(buff, info) {
         }
     }else if(info.y == undefined){
         info.y = D.getUint32(25+slen, true);
+        getData('propend/Measurement.ScanNumber', readITAimage, info);
+        
+    }else if(info.Nscan == undefined){
+        var L = D.getUint32(25+slen+16, true);
+        var L2 = D.getUint32(25+slen+16+22+L, true);
+        var SVal = "";
+        for(var i=0;i<L2;i++){
+            SVal += String.fromCharCode(D.getUint16(25+slen+16+26+L+2*i,true));
+        }
+        info.Nscan = parseInt(SVal);
         getData('filterdata/TofCorrection/ImageStack/Reduced Data/ImageStackScansAdded/Image['+info.id+']/ImageArray.Long', parseData, info);
     }
 }
